@@ -1,5 +1,13 @@
 package telem;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDate;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.time.LocalDate;
 
 public class GestorAlquileres {
@@ -21,6 +29,83 @@ public class GestorAlquileres {
 
     /////////////////////////////////////////////////////////////////////////////////////
     // INICIALIZACIÓN DE CLIENTES Y VEHÍCULOS DE EJEMPLO
+
+public void guardarDatos(String fichero) throws IOException {
+    if (fichero == null || fichero.trim().isEmpty()) {
+        throw new IllegalArgumentException("El nombre del fichero no puede estar vacío.");
+    }
+
+    JSONObject datos = new JSONObject();
+    JSONArray datosClientes = new JSONArray();
+    JSONArray datosVehiculos = new JSONArray();
+    JSONArray datosAlquileres = new JSONArray();
+
+    for (Cliente cliente : clientes) {
+        if (cliente != null) {
+            datosClientes.put(new JSONObject(cliente.toString()));
+        }
+    }
+
+    for (Vehiculo vehiculo : vehiculos) {
+        if (vehiculo != null) {
+            datosVehiculos.put(new JSONObject(vehiculo.toString()));
+        }
+    }
+
+    for (Alquiler alquiler : alquileres) {
+        if (alquiler != null) {
+            datosAlquileres.put(new JSONObject(alquiler.toString()));
+        }
+    }
+
+    datos.put("clientes", datosClientes);
+    datos.put("vehiculos", datosVehiculos);
+    datos.put("alquileres", datosAlquileres);
+
+    Path ruta = Paths.get(fichero);
+    Path directorio = ruta.toAbsolutePath().getParent();
+
+    if (directorio != null) {
+        Files.createDirectories(directorio);
+    }
+
+    Files.write(ruta, datos.toString(2).getBytes(StandardCharsets.UTF_8));
+}
+
+public void cargarDatos(String fichero) throws IOException {
+    if (fichero == null || fichero.trim().isEmpty()) {
+        throw new IllegalArgumentException("El nombre del fichero no puede estar vacío.");
+    }
+
+    Path ruta = Paths.get(fichero);
+    String contenido = new String(Files.readAllBytes(ruta), StandardCharsets.UTF_8);
+    JSONObject datos = new JSONObject(contenido);
+
+    JSONArray datosClientes = datos.getJSONArray("clientes");
+    JSONArray datosVehiculos = datos.getJSONArray("vehiculos");
+    JSONArray datosAlquileres = datos.getJSONArray("alquileres");
+
+    Cliente[] nuevosClientes = new Cliente[Math.max(10, datosClientes.length())];
+    Vehiculo[] nuevosVehiculos = new Vehiculo[Math.max(100, datosVehiculos.length())];
+    Alquiler[] nuevosAlquileres = new Alquiler[Math.max(1000, datosAlquileres.length())];
+
+    for (int i = 0; i < datosClientes.length(); i++) {
+        nuevosClientes[i] = new Cliente(datosClientes.getJSONObject(i).toString());
+    }
+
+    for (int i = 0; i < datosVehiculos.length(); i++) {
+        nuevosVehiculos[i] = FactoriaVehiculos.getVehiculo(datosVehiculos.getJSONObject(i).toString());
+    }
+
+    for (int i = 0; i < datosAlquileres.length(); i++) {
+        nuevosAlquileres[i] = new Alquiler(datosAlquileres.getJSONObject(i).toString());
+    }
+
+    clientes = nuevosClientes;
+    vehiculos = nuevosVehiculos;
+    alquileres = nuevosAlquileres;
+    contadorAlquileres = datosAlquileres.length();
+}
 
     // Definimos métodos privados para inicializar clientes y vehículos de ejemplo
     private void inicializarClientes() {
@@ -162,7 +247,8 @@ public class GestorAlquileres {
                 System.out.println("(1) seleccionar coche para alquilar");
                 System.out.println("(2) entregar un coche alquilado");
                 System.out.println("(3) listar su histórico de alquileres");
-
+                System.out.println("(4) guardar datos en fichero JSON");
+                System.out.println("(5) recuperar datos de fichero JSON");
                 int opcion = KeyBoard.readInt();
                 System.out.println("opción escogida: " + opcion);
 
@@ -219,6 +305,29 @@ public class GestorAlquileres {
                         for (Alquiler q: alqs){
                             System.out.print(q);
                         }
+
+                    case 4:
+                    System.out.println("Introduzca el nombre del fichero para guardar:");
+                    String ficheroGuardar = KeyBoard.readString();
+                    try {
+                         guardarDatos(ficheroGuardar);
+                         System.out.println("Datos guardados correctamente.");
+                    } catch (IOException e) {
+                        System.out.println("Error al guardar los datos: " + e.getMessage());
+                    }
+                        break;
+
+                    case 5:
+                        System.out.println("Introduzca el nombre del fichero para recuperar:");
+                        String ficheroCargar = KeyBoard.readString();
+                            try {
+                             cargarDatos(ficheroCargar);
+                                System.out.println("Datos recuperados correctamente.");
+                        } catch (IOException e) {
+                            System.out.println("Error al recuperar los datos: " + e.getMessage());
+                        }
+                            break;
+
                     default:
                         break;
                 }
