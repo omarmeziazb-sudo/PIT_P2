@@ -2,8 +2,6 @@
 package telem;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 import org.json.JSONObject;
 
 /**
@@ -25,8 +23,7 @@ public class Alquiler {
     public static final int PRECIO_BASE = 50;
     private static int contadorAlquileres = 0;
 
-    public Alquiler(Vehiculo vehiculo, Cliente cliente,
-                    LocalDate fechaInicio, LocalDate fechaFin) {
+    public Alquiler(Vehiculo vehiculo, Cliente cliente,LocalDate fechaInicio, LocalDate fechaFin) {
 
         this.vehiculo = vehiculo;
         this.cliente = cliente;
@@ -65,16 +62,38 @@ public class Alquiler {
         return fechaFin;
     }
 
-    public int calcularPrecioAlquiler(LocalDate fechaInicio,
-                                      LocalDate fechaFin) {
+    
+public int calcularPrecioAlquiler(LocalDate fechaInicio, LocalDate fechaFin) {
+    return calcularPrecioAlquiler(fechaInicio, fechaFin, PoliticasDePrecios.Normal, vehiculo);
+}
 
-        // +1 para incluir también el día inicial
-        int dias = (int) ChronoUnit.DAYS.between(
-            fechaInicio, fechaFin
-        ) + 1;
-
-        return dias * PRECIO_BASE;
+public int calcularPrecioAlquiler(LocalDate fechaInicio, LocalDate fechaFin, PoliticasDePrecios politica, Vehiculo vehiculo) {
+    if (politica == null) {
+        throw new IllegalArgumentException("La política de precios no puede ser null.");
     }
+
+    ICalculadorPrecio calculador;
+
+    switch (politica) {
+        case Normal:
+            calculador = new CalculadorPrecioNormal();
+            break;
+        case TemporadaAlta:
+            calculador = new CalculadorPrecioTemporadaAlta();
+            break;
+        case Oferton:
+            calculador = new CalculadorPrecioOferton();
+            break;
+        case ClienteFrecuente:
+            calculador = new CalculadorPrecioClienteFrecuente();
+            break;
+        default:
+            throw new IllegalArgumentException("Política de precios desconocida.");
+    }
+
+    return calculador.calcularPrecioAlquiler(fechaInicio, fechaFin, vehiculo);
+}
+
 
     @Override
     public String toString() {
@@ -84,30 +103,20 @@ public class Alquiler {
     public static void main(String[] args) {
 
         // Crear instancias de Vehiculo y Cliente
-        Vehiculo vehiculo1 = new Turismo(
-            "ABC123", Categoria.NORMAL, 2020, 5, 400.0
-        );
+        Vehiculo vehiculo1 = new Turismo("ABC123", Categoria.NORMAL, 2020, 5, 400.0 );
 
-        Cliente cliente1 = new Cliente(
-            "Juan Pérez", "123456789"
-        );
+        Cliente cliente1 = new Cliente( "Juan Pérez", "123456789" );
 
         LocalDate hoy = LocalDate.now();
 
-        Alquiler alquiler1 = new Alquiler(
-            vehiculo1, cliente1, hoy, hoy.plusDays(3)
-        );
+        Alquiler alquiler1 = new Alquiler( vehiculo1, cliente1, hoy, hoy.plusDays(3) );
 
         System.out.println(alquiler1.toString());
         System.out.println("-----------------------------------------------");
 
-        Vehiculo vehiculo2 = new VehiculoIndustrial(
-            "ABC123", Categoria.NORMAL, 2020, 1000, 3
-        );
+        Vehiculo vehiculo2 = new VehiculoIndustrial("ABC123", Categoria.NORMAL, 2020, 1000, 3 );
 
-        Alquiler alquiler2 = new Alquiler(
-            vehiculo2, cliente1, hoy, hoy.plusDays(3)
-        );
+        Alquiler alquiler2 = new Alquiler(vehiculo2, cliente1, hoy, hoy.plusDays(3) );
 
         System.out.println(alquiler2.toString());
         System.out.println("-----------------------------------------------");
