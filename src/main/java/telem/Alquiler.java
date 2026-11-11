@@ -76,32 +76,12 @@ public int calcularPrecioAlquiler(LocalDate fechaInicio, LocalDate fechaFin) {
     return calcularPrecioAlquiler(fechaInicio, fechaFin, PoliticasDePrecios.Normal, vehiculo);
 }
 
+
 public int calcularPrecioAlquiler(LocalDate fechaInicio, LocalDate fechaFin, PoliticasDePrecios politica, Vehiculo vehiculo) {
-    if (politica == null) {
-        throw new IllegalArgumentException("La política de precios no puede ser null.");
-    }
-
-    ICalculadorPrecio calculador;
-
-    switch (politica) {
-        case Normal:
-            calculador = new CalculadorPrecioNormal();
-            break;
-        case TemporadaAlta:
-            calculador = new CalculadorPrecioTemporadaAlta();
-            break;
-        case Oferton:
-            calculador = new CalculadorPrecioOferton();
-            break;
-        case ClienteFrecuente:
-            calculador = new CalculadorPrecioClienteFrecuente();
-            break;
-        default:
-            throw new IllegalArgumentException("Política de precios desconocida.");
-    }
-
+    ICalculadorPrecio calculador = FactoriaPoliticasDePrecios.getCalculadorPrecio(politica);
     return calculador.calcularPrecioAlquiler(fechaInicio, fechaFin, vehiculo);
 }
+
 
 
     @Override
