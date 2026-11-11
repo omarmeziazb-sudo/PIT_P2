@@ -29,7 +29,16 @@ public class Alquiler {
         this.cliente = cliente;
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
+    } 
+     
+    public Alquiler(String jsonString) {
+        JSONObject json = new JSONObject(jsonString);
+        this.vehiculo = FactoriaVehiculos.getVehiculo(json.getJSONObject("vehiculo").toString());
+        this.cliente = new Cliente(json.getJSONObject("cliente").toString());
+        this.fechaInicio = LocalDate.parse(json.getString("fechaInicio"));
+        this.fechaFin = LocalDate.parse(json.getString("fechaFin"));
     }
+
 
     public static Alquiler[] obtenerAlquileres() {
         return alquileres;

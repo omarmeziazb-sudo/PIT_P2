@@ -15,6 +15,11 @@ public class Cliente {
         this.nombre = nombre;
         this.dni = dni;
     }
+    public Cliente(String jsonString) {
+        JSONObject json = new JSONObject(jsonString);
+        this.nombre = json.getString("nombre");
+        this.dni = json.getString("dni");
+    }
 
     public String getNombre() {
         return nombre;
