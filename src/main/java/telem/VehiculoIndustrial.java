@@ -1,15 +1,12 @@
-package telem;
 
-import org.json.JSONObject;
+package telem;
 
 public class VehiculoIndustrial extends Vehiculo {
 
     private int capacidadCarga;
     private int numeroEjes;
 
-    public VehiculoIndustrial(String matricula, Categoria categoria, int annio,
-        int capacidadCarga, int numeroEjes
-    ) {
+    public VehiculoIndustrial(String matricula, Categoria categoria, int annio, int capacidadCarga, int numeroEjes) {
         super(matricula, categoria, annio);
         this.capacidadCarga = capacidadCarga;
         this.numeroEjes = numeroEjes;
@@ -23,8 +20,25 @@ public class VehiculoIndustrial extends Vehiculo {
         return numeroEjes;
     }
 
-    @Override 
-    public String toString() {
-        return new JSONObject(this).toString();
+    @Override
+    public String getTipo() {
+        return "VehiculoIndustrial";
+    }
+
+    @Override
+    public int getPrecioBase() {
+        int precioBase = 0;
+        switch (getCategoria()) {
+            case NORMAL:
+                precioBase = 50;
+                break;
+            case ESPECIAL:
+                precioBase = 80;
+                break;
+            case SUPERIOR:
+                precioBase = 100;
+                break;
+        }
+        return precioBase;
     }
 }
